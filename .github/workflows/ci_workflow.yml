@@ -46,8 +46,11 @@ jobs:
       shell: bash
     - name: Install dependencies
       run: uv sync
-    - name: start elasticsearch container
-      run: docker-compose up -d elasticsearch --wait &
+    - uses: actions/cache@v4
+      with:
+        path: ~/elasticsearch
+        key: ${{ runner.os }}-elasticsearch-9
+    - uses: ankane/setup-elasticsearch@v1
     - name: Test with pytest
       run: uv run pytest --capture=no
 
@@ -75,7 +78,11 @@ jobs:
       run: uv tool install meltano
     - name: Install Meltano plugins
       run: meltano install --clean
-    - name: start elasticsearch container
-      run: docker-compose up -d elasticsearch --wait &
+    - uses: actions/cache@v4
+      with:
+        path: ~/elasticsearch
+        key: ${{ runner.os }}-elasticsearch-9
+    - uses: ankane/setup-elasticsearch@v1
     - name: smoke-test-tap
+
       run: meltano run tap-smoke-test target-elasticsearch
