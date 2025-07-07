@@ -46,11 +46,12 @@ jobs:
       shell: bash
     - name: Install dependencies
       run: uv sync
+    - name: start elasticsearch container
+      run: docker-compose up -d elasticsearch --wait &
+      env:
+        ELASTIC_PASSWORD: changeme
     - name: Test with pytest
-      run: |
-        docker-compose up -d elasticsearch
-        sleep 30
-        uv run pytest --capture=no
+      run: uv run pytest --capture=no
 
   integration:
     runs-on: ubuntu-latest
@@ -76,10 +77,9 @@ jobs:
       run: uv tool install meltano
     - name: Install Meltano plugins
       run: meltano install --clean
-    - name: smoke-test-tap
+    - name: start elasticsearch container
+      run: docker-compose up -d elasticsearch --wait &
       env:
         ELASTIC_PASSWORD: changeme
-      run: |
-        docker-compose up -d elasticsearch
-        sleep 30
-        meltano run tap-smoke-test target-elasticsearch
+    - name: smoke-test-tap
+      run: meltano run tap-smoke-test target-elasticsearch
