@@ -47,7 +47,7 @@ jobs:
     - name: Install dependencies
       run: uv sync
     - name: start elasticsearch container
-      run: docker-compose up -d elasticsearch --wait --wait-timeout 30 &
+      run: docker-compose up -d elasticsearch --wait &
     - name: Test with pytest
       run: uv run pytest --capture=no
 
@@ -76,6 +76,6 @@ jobs:
     - name: Install Meltano plugins
       run: meltano install --clean
     - name: start elasticsearch container
-      run: docker-compose up -d elasticsearch --wait --wait-timeout 30 &
+      run: docker-compose up -d elasticsearch --wait &
     - name: smoke-test-tap
       run: meltano run tap-smoke-test target-elasticsearch
