@@ -32,9 +32,7 @@ class ElasticSink(BatchSink):
     ):
         super().__init__(target, stream_name, schema, key_properties)
         self.client = self._authenticated_client()
-        self.index_schema_fields = self.config.get("index_schema_fields", {}).get(
-            self.stream_name, {}
-        )
+        self.index_schema_fields = self.config.get("index_schema_fields", {}).get(self.stream_name, {})
         self.metadata_fields = self.config.get("metadata_fields", {}).get(self.stream_name, {})
         self.index_mappings = self.config.get("index_mappings", {}).get(self.stream_name, {})
         self.index_name = None
@@ -49,6 +47,26 @@ class ElasticSink(BatchSink):
         if not self.index_schema_fields:
             self.index_name = self._template_index()
             self.create_index(self.index_name)
+
+    def preprocess_record(self, record: dict, context: dict) -> dict:  # noqa: PLR6301, ARG002
+        """Process incoming record and return a modified result.
+
+        Args:
+            record: Individual record in the stream.
+            context: Stream partition or context dictionary.
+
+        Returns:
+            A new, processed record.
+        """
+        for field, mapping in self.index_mappings.items():
+            type = mapping.get("type")
+            if type == "keyword":
+                value = record.get(field)
+                if value:
+                    record[field] = (
+                        [item.strip() for item in record[field].split(",")] if isinstance(value, str) else value
+                    )
+        return record
 
     def _template_index(self, schemas: dict = {}) -> str:
         """Template the input index config for Elasticsearch indexing.
@@ -99,9 +117,7 @@ class ElasticSink(BatchSink):
         for k, v in mapping.items():
             match = jsonpath_ng.parse(v).find(record)
             if len(match) == 0:
-                self.logger.warning(
-                    f"schema key {k} with json path {v} could not be found in record: {record}"
-                )
+                self.logger.warning(f"schema key {k} with json path {v} could not be found in record: {record}")
                 schemas[k] = v
             else:
                 if len(match) > 1:
@@ -157,13 +173,9 @@ class ElasticSink(BatchSink):
                         index=index, fields=list(self.index_mappings.keys())
                     )[index]["mappings"].items()
                 }
-                if not all(
-                    self.index_mappings[key]["type"] == value for key, value in mappings.items()
-                ):
+                if not all(self.index_mappings[key]["type"] == value for key, value in mappings.items()):
                     try:
-                        self.client.indices.put_mapping(
-                            index=index, body={"properties": self.index_mappings}
-                        )
+                        self.client.indices.put_mapping(index=index, body={"properties": self.index_mappings})
                     except elasticsearch.exceptions.BadRequestError as e:
                         if e.message == "illegal_argument_exception":
                             self.logger.warning(
@@ -217,9 +229,7 @@ class ElasticSink(BatchSink):
         Args:
             context: Dictionary containing batch processing context including records.
         """
-        updated_records, distinct_indices = self.build_request_body_and_distinct_indices(
-            context["records"]
-        )
+        updated_records, distinct_indices = self.build_request_body_and_distinct_indices(context["records"])
         for index in distinct_indices:
             self.create_index(index)
         try:
