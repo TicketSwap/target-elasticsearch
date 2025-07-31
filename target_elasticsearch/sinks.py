@@ -151,6 +151,8 @@ class ElasticSink(BatchSink):
             else:
                 index = self.index_name
             updated_record = {"_op_type": "index", "_index": index, "_source": record}
+            if self.key_properties:
+                updated_record["_id"] = "-".join(str(record.get(key, "")) for key in self.key_properties)
             if self.metadata_fields is not None:
                 # Build metadata fields for the record
                 metadata_fields = self._build_fields(self.metadata_fields, record)
