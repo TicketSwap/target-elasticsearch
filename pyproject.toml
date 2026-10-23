@@ -3,7 +3,7 @@ name = "target-elasticsearch"
 version = "1.0.2"
 description = "`target-elasticsearch` is a singer target using the meltano SDK for targets"
 authors = [{ name = "DT Mirizzi", email = "dtmirizzi@gmail.com" }]
-requires-python = "<3.13,>=3.9.1"
+requires-python = "<3.13,>=3.11"
 license = "GPL-3.0"
 keywords = [
     "elasticsearch",
@@ -13,14 +13,15 @@ keywords = [
     "singer",
 ]
 dependencies = [
-    "requests>=2.25.1",
-    "singer-sdk>=0.38.0",
-    "elasticsearch>=8.14.0,<9",
-    "Jinja2>=3.1.2",
-    "jsonpath-ng>=1.5.3",
-    "types-python-dateutil>=2.8.19",
-    "time-machine>=2.8.2",
-    "typing-extensions>=4.4.0",
+    "requests>=2.34.2",
+    "singer-sdk>=0.54.9",
+    "elasticsearch>=8.19.3,<9",
+    "Jinja2>=3.1.6",
+    "jsonpath-ng>=1.12.0",
+    "python-dateutil>=3.0.0",
+    "types-python-dateutil>=2.9.0.20261021",
+    "time-machine>=3.5.1",
+    "typing-extensions>=4.16.0",
 ]
 
 [project.scripts]
@@ -28,14 +29,14 @@ target-elasticsearch = "target_elasticsearch.target:TargetElasticsearch.cli"
 
 [dependency-groups]
 dev = [
-    "pytest>=7.1.2,<8",
-    "tox>=3.24.4,<4",
-    "flake8>=4.0.1,<5",
-    "black>=22.3.0,<23",
-    "pydocstyle>=6.1.1,<7",
-    "mypy>=0.960,<0.961",
-    "isort>=5.10.1,<6",
-    "pre-commit>=2.19.0,<3",
+    "pytest>=9.1.1,<10",
+    "tox>=4.67.1,<5",
+    "flake8>=7.4.1,<8",
+    "black>=26.10.1,<27",
+    "pydocstyle>=6.3.0,<7",
+    "mypy>=2.4.0,<2.5",
+    "isort>=9.0.2,<10",
+    "pre-commit>=4.7.0,<5",
 ]
 
 [build-system]
@@ -49,4 +50,4 @@ src_paths = "target_elasticsearch"
 
 [tool.black]
 line-length = 120
-target-version = ['py39']
+target-version = ['py311']
